@@ -25,7 +25,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
           displayName
           phone
           defaultEmailAddress { emailAddress }
-          defaultAddress { city provinceCode }
+          defaultAddress { city provinceCode phone }
           metafield(namespace: "wishlist", key: "items") { value }
         }
       }`,
@@ -37,7 +37,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       customerInfo = {
         name: cust.displayName || "",
         email: cust.defaultEmailAddress?.emailAddress || "",
-        phone: cust.phone || "",
+        phone: cust.phone || cust.defaultAddress?.phone || "",
         city: cust.defaultAddress?.city || "",
         state: cust.defaultAddress?.provinceCode || "",
       };
