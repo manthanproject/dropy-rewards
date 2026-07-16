@@ -51,6 +51,25 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     return Response.json({ loggedIn: true, items: [] });
   }
 
+  // 1b. Capture customer details (name, email, phone) for WhatsApp automation — runs even with empty wishlist
+  if (customerInfo) {
+    try {
+      await supabase
+        .from("wishlist_customers")
+        .upsert([{
+          customer_id: customerId,
+          name: customerInfo.name,
+          email: customerInfo.email,
+          phone: customerInfo.phone,
+          city: customerInfo.city,
+          state: customerInfo.state,
+          updated_at: new Date().toISOString(),
+        }], { onConflict: "customer_id" });
+    } catch (e) {
+      /* non-critical */
+    }
+  }
+
   if (!gids.length) return Response.json({ loggedIn: true, items: [] });
 
   // 1b. Auto-sync: backfill Supabase mirror from metafield (non-critical, never blocks response)
@@ -95,25 +114,6 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     }
   } catch (e) {
     /* backfill failed — non-critical, don't block the response */
-  }
-
-  // 1c. Capture customer details (name, email, phone, location) for WhatsApp automation
-  if (customerInfo) {
-    try {
-      await supabase
-        .from("wishlist_customers")
-        .upsert([{
-          customer_id: customerId,
-          name: customerInfo.name,
-          email: customerInfo.email,
-          phone: customerInfo.phone,
-          city: customerInfo.city,
-          state: customerInfo.state,
-          updated_at: new Date().toISOString(),
-        }], { onConflict: "customer_id" });
-    } catch (e) {
-      /* non-critical */
-    }
   }
 
   // 2. Hydrate display data for those products
