@@ -15,19 +15,34 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
   const ownerId = `gid://shopify/Customer/${customerId}`;
 
-  // 1. Read saved GIDs
+  // 1. Read saved GIDs + customer details
   let gids: string[] = [];
+  let customerInfo: any = null;
   try {
     const res = await admin.graphql(
       `query ($id: ID!) {
         customer(id: $id) {
+          displayName
+          phone
+          defaultEmailAddress { emailAddress }
+          defaultAddress { city provinceCode }
           metafield(namespace: "wishlist", key: "items") { value }
         }
       }`,
       { variables: { id: ownerId } },
     );
     const data = await res.json();
-    const raw = data?.data?.customer?.metafield?.value;
+    const cust = data?.data?.customer;
+    if (cust) {
+      customerInfo = {
+        name: cust.displayName || "",
+        email: cust.defaultEmailAddress?.emailAddress || "",
+        phone: cust.phone || "",
+        city: cust.defaultAddress?.city || "",
+        state: cust.defaultAddress?.provinceCode || "",
+      };
+    }
+    const raw = cust?.metafield?.value;
     if (raw) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed)) gids = parsed.filter((x) => typeof x === "string");
@@ -80,6 +95,25 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     }
   } catch (e) {
     /* backfill failed — non-critical, don't block the response */
+  }
+
+  // 1c. Capture customer details (name, email, phone, location) for WhatsApp automation
+  if (customerInfo) {
+    try {
+      await supabase
+        .from("wishlist_customers")
+        .upsert([{
+          customer_id: customerId,
+          name: customerInfo.name,
+          email: customerInfo.email,
+          phone: customerInfo.phone,
+          city: customerInfo.city,
+          state: customerInfo.state,
+          updated_at: new Date().toISOString(),
+        }], { onConflict: "customer_id" });
+    } catch (e) {
+      /* non-critical */
+    }
   }
 
   // 2. Hydrate display data for those products
