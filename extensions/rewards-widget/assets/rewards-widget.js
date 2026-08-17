@@ -66,29 +66,64 @@
   door.addEventListener("click", function () { toggle(!open); });
   panel.querySelector(".dr-x").addEventListener("click", function () { toggle(false); });
 
-  // Wire the header store-credit icon (.dropy-credit) to open the rewards panel
-  // If logged out (no .dropy-credit), inject a rewards icon in the header
-  var creditIcons = document.querySelectorAll(".dropy-credit");
-  if (creditIcons.length) {
-    creditIcons.forEach(function (icon) {
-      icon.removeAttribute("href");
-      icon.setAttribute("role", "button");
+  // Wire the header store-credit icon (.dropy-credit) to open the rewards panel.
+  // The theme renders it as an <a href="account...">, so we REPLACE the anchor with a
+  // <button> clone — no href, no anchor semantics, cannot navigate under any condition.
+  function wireCreditIcon(icon) {
+    if (!icon || icon.dataset.drWired === "1") return;
+
+    // Already a button (our own replacement) — just bind
+    if (icon.tagName === "BUTTON") {
+      icon.dataset.drWired = "1";
       icon.addEventListener("click", function (e) {
         e.preventDefault();
         e.stopPropagation();
-        e.stopImmediatePropagation();
         toggle(!open);
-        return false;
-      }, true);
-      icon.addEventListener("touchend", function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        toggle(!open);
-      }, true);
-      icon.style.cursor = "pointer";
+      });
+      return;
+    }
+
+    // Build a button that looks identical to the anchor
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = icon.className;
+    btn.innerHTML = icon.innerHTML;
+    btn.setAttribute("aria-label", icon.getAttribute("aria-label") || "Rewards");
+    btn.dataset.drWired = "1";
+    btn.style.cursor = "pointer";
+    btn.style.background = "none";
+    btn.style.border = "0";
+    btn.style.padding = getComputedStyle(icon).padding;
+
+    btn.addEventListener("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      toggle(!open);
     });
-  } else {
-    // Inject a rewards trigger icon in the header for logged-out users
+
+    if (icon.parentNode) icon.parentNode.replaceChild(btn, icon);
+  }
+
+  function wireAllCreditIcons() {
+    var icons = document.querySelectorAll(".dropy-credit");
+    if (icons.length) {
+      icons.forEach(wireCreditIcon);
+      return true;
+    }
+    return false;
+  }
+
+  var hasCredit = wireAllCreditIcons();
+
+  // Theme may re-render the header (cart updates, drawer opens) — re-wire if the
+  // anchor comes back.
+  var headerObserver = new MutationObserver(function () {
+    document.querySelectorAll("a.dropy-credit").forEach(wireCreditIcon);
+  });
+  headerObserver.observe(document.body, { childList: true, subtree: true });
+
+  if (!hasCredit) {
+    // Logged out — inject a rewards trigger icon in the header
     var headerCart = document.querySelector(".header-icon-cart, a[href*='/cart']");
     if (headerCart && headerCart.parentNode) {
       var rewardsBtn = document.createElement("button");
