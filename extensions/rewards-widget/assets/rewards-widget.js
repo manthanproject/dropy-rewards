@@ -68,13 +68,16 @@
 
   // Wire the header store-credit icon (.dropy-credit) to open the rewards panel
   // If logged out (no .dropy-credit), inject a rewards icon in the header
-  var creditIcon = document.querySelector(".dropy-credit");
-  if (creditIcon) {
-    creditIcon.addEventListener("click", function (e) {
-      e.preventDefault();
-      toggle(!open);
+  var creditIcons = document.querySelectorAll(".dropy-credit");
+  if (creditIcons.length) {
+    creditIcons.forEach(function (icon) {
+      icon.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        toggle(!open);
+      });
+      icon.style.cursor = "pointer";
     });
-    creditIcon.style.cursor = "pointer";
   } else {
     // Inject a rewards trigger icon in the header for logged-out users
     var headerCart = document.querySelector(".header-icon-cart, a[href*='/cart']");
