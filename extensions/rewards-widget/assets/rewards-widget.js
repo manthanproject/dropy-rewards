@@ -71,11 +71,20 @@
   var creditIcons = document.querySelectorAll(".dropy-credit");
   if (creditIcons.length) {
     creditIcons.forEach(function (icon) {
+      icon.removeAttribute("href");
+      icon.setAttribute("role", "button");
       icon.addEventListener("click", function (e) {
         e.preventDefault();
         e.stopPropagation();
+        e.stopImmediatePropagation();
         toggle(!open);
-      });
+        return false;
+      }, true);
+      icon.addEventListener("touchend", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        toggle(!open);
+      }, true);
       icon.style.cursor = "pointer";
     });
   } else {
