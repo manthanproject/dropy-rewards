@@ -1528,3 +1528,37 @@
     max-height: 75dvh !important;
   }
 }
+
+/* ── Desktop landscape layout (wider panel, 2-column cards) ── */
+@media (min-width: 900px) {
+  .dr-panel,
+  .dr-panel.dr-left,
+  .dr-panel.dr-right {
+    width: 760px !important;
+    max-width: calc(100vw - 48px) !important;
+    max-height: min(62vh, 560px) !important;
+  }
+
+  /* header spans full width */
+  .dr-head {
+    padding: 18px 26px 16px;
+  }
+
+  /* cards flow into two columns */
+  .dr-body {
+    padding: 16px 20px 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    align-content: start;
+  }
+
+  .dr-body > .dr-card {
+    margin-bottom: 0;
+  }
+
+  /* let a lone/odd card stretch full width when it's the only one in its row */
+  .dr-body > .dr-card:only-child {
+    grid-column: 1 / -1;
+  }
+}
