@@ -67,6 +67,7 @@
   panel.querySelector(".dr-x").addEventListener("click", function () { toggle(false); });
 
   // Wire the header store-credit icon (.dropy-credit) to open the rewards panel
+  // If logged out (no .dropy-credit), inject a rewards icon in the header
   var creditIcon = document.querySelector(".dropy-credit");
   if (creditIcon) {
     creditIcon.addEventListener("click", function (e) {
@@ -74,6 +75,21 @@
       toggle(!open);
     });
     creditIcon.style.cursor = "pointer";
+  } else {
+    // Inject a rewards trigger icon in the header for logged-out users
+    var headerCart = document.querySelector(".header-icon-cart, a[href*='/cart']");
+    if (headerCart && headerCart.parentNode) {
+      var rewardsBtn = document.createElement("button");
+      rewardsBtn.type = "button";
+      rewardsBtn.className = "dr-header-trigger";
+      rewardsBtn.setAttribute("aria-label", "Rewards");
+      rewardsBtn.innerHTML = '<svg class="dropy-credit__icon" width="28" height="28" viewBox="0 0 100 100" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><g transform="translate(42, 14) rotate(18)"><rect x="0" y="0" width="38" height="58" rx="4" fill="#064E3B"></rect><rect x="34" y="0" width="4" height="58" rx="2" fill="#022C22"></rect></g><g transform="translate(32, 15) rotate(6)"><rect x="0" y="0" width="42" height="62" rx="4" fill="#059669"></rect><rect x="38" y="0" width="4" height="62" rx="2" fill="#047857"></rect></g><g transform="translate(18, 20) rotate(-10)"><rect x="0" y="0" width="46" height="66" rx="4" fill="#10B981" stroke="#ffffff" stroke-width="1.5"></rect><rect x="5" y="5" width="36" height="56" rx="2" fill="none" stroke="#ffffff" stroke-width="1.5" opacity="0.5"></rect><rect x="8" y="10" width="8" height="8" fill="#ffffff" opacity="0.9" rx="1.5"></rect><text x="23" y="45" font-family="-apple-system, Arial, sans-serif" font-size="28" font-weight="900" fill="#ffffff" text-anchor="middle">₹</text></g></svg>';
+      rewardsBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        toggle(!open);
+      });
+      headerCart.parentNode.insertBefore(rewardsBtn, headerCart);
+    }
   }
 
   function tierHTML(res) {

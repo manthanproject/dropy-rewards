@@ -1475,3 +1475,24 @@
 @media (max-width: 767px) {
   .dw-header-icon { display: none !important; }
 }
+
+/* ── Rewards header trigger (logged-out fallback) ── */
+.dr-header-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  color: inherit;
+  transition: transform 0.15s;
+}
+.dr-header-trigger:hover { transform: scale(1.1); }
+.dr-header-trigger svg {
+  width: 24px;
+  height: 24px;
+  fill: rgba(var(--color-heading, 48, 48, 48), 1);
+}
