@@ -59,10 +59,12 @@
 /* ---------- panel ---------- */
 .dr-panel {
   position: fixed;
-  bottom: calc(var(--dr-off, 20px) + 72px);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.97);
   width: 396px;
   max-width: calc(100vw - 24px);
-  max-height: min(72vh, 700px);
+  max-height: min(80vh, 700px);
   display: flex;
   flex-direction: column;
   border-radius: 24px;
@@ -73,23 +75,22 @@
   border: 1px solid rgba(255, 255, 255, 0.7);
   box-shadow: 0 30px 70px -18px rgba(35, 16, 2, 0.4), 0 4px 14px rgba(35, 16, 2, 0.08);
   opacity: 0;
-  transform: translateY(18px) scale(0.97);
   pointer-events: none;
   transition: opacity 0.35s ease, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .dr-panel.dr-open {
   opacity: 1;
-  transform: translateY(0) scale(1);
+  transform: translate(-50%, -50%) scale(1);
   pointer-events: auto;
 }
 
 .dr-panel.dr-right {
-  right: 16px;
+  /* centered — no side offset needed */
 }
 
 .dr-panel.dr-left {
-  left: 16px;
+  /* centered — no side offset needed */
 }
 
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
