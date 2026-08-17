@@ -37,7 +37,7 @@
     (style !== "text" ? ICON : "") +
     (style !== "icon" ? "<span>" + esc(d.doorText || "Rewards") + "</span>" : "");
   if (style === "icon") door.classList.add("dr-icon");
-  document.body.appendChild(door);
+  // door hidden — panel is triggered by the header store-credit icon instead
 
   var panel = document.createElement("div");
   panel.className = "dr-panel dr-" + pos;
@@ -65,6 +65,16 @@
   }
   door.addEventListener("click", function () { toggle(!open); });
   panel.querySelector(".dr-x").addEventListener("click", function () { toggle(false); });
+
+  // Wire the header store-credit icon (.dropy-credit) to open the rewards panel
+  var creditIcon = document.querySelector(".dropy-credit");
+  if (creditIcon) {
+    creditIcon.addEventListener("click", function (e) {
+      e.preventDefault();
+      toggle(!open);
+    });
+    creditIcon.style.cursor = "pointer";
+  }
 
   function tierHTML(res) {
     var t = res.tier;
