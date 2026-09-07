@@ -9,7 +9,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { data } = await supabase
     .from("loyalty_config")
     .select("key, value")
-    .in("key", ["gift_enabled", "gift_tiers", "gift_threshold_paise", "gift_products"]);
+    .in("key", ["gift_enabled", "gift_tiers", "gift_threshold_paise", "gift_products", "gift_lazy_mode"]);
   const c = Object.fromEntries((data ?? []).map((r: any) => [r.key, r.value]));
 
   // Prefer the multi-tier config. If gift_tiers isn't seeded yet (half-deploy), synthesize a
@@ -44,8 +44,13 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
   const enabled = (c.gift_enabled ?? "0") === "1" && tiers.some((t) => t.handles.length > 0);
 
+  // Kill switch for the lazy gift path. Absent key -> "0" -> false -> widget keeps the old
+  // behaviour. Flip to "1" in loyalty_config to enable; no deploy needed either direction.
+  const lazyMode = (c.gift_lazy_mode ?? "0") === "1";
+
   return Response.json({
     enabled,
+    lazy_mode: lazyMode,
     tiers,
     // Legacy fields (first tier) kept as a superset so an older widget asset still renders the
     // gift during a half-deploy. The current widget reads `tiers` and ignores these.
